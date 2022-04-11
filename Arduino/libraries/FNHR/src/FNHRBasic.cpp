@@ -135,6 +135,10 @@ Point::Point(float x, float y, float z)
   this->z = z;
 }
 
+////
+
+float FootTip;
+
 float Point::GetDistance(Point point1, Point point2)
 {
   return sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2) + pow(point1.z - point2.z, 2));
@@ -171,8 +175,7 @@ void RobotJoint::Set(int servoPin, float jointZero, bool jointDir, float jointMi
   this->offset = offset;
 }
 
-void RobotJoint::SetOffset(float offset)
-{
+void RobotJoint::SetOffset(float offset){
   while (offset > 180)
     offset -= 360;
   while (offset < -180)
@@ -189,8 +192,7 @@ void RobotJoint::SetOffset(float offset)
   this->offset = offset;
 }
 
-void RobotJoint::SetOffsetEnableState(bool state)
-{
+void RobotJoint::SetOffsetEnableState(bool state){
   isOffsetEnable = state;
 }
 
@@ -393,12 +395,10 @@ void RobotLeg::RotateToDirectly(float alpha, float beta, float gamma)
 
 Robot::Robot() {}
 
-void Robot::Start()
-{
+void Robot::Start(){
   dataFormatVersion = EEPROM.read(EepromAddresses::dataFormatVersion);
 
-  switch (dataFormatVersion)
-  {
+  switch (dataFormatVersion){
     float defaultReference;
     float externalReference;
 
@@ -579,8 +579,8 @@ void Robot::MoveToRelatively(Point point, float speed)
   MoveToRelatively(point);
 }
 
-void Robot::WaitUntilFree()
-{
+void Robot::WaitUntilFree(){
+  // Do nothing until all the legs have finished their actuation cycles.
   while (leg1.isBusy || leg2.isBusy || leg3.isBusy || leg4.isBusy || leg5.isBusy || leg6.isBusy);
 }
 
@@ -638,8 +638,7 @@ void Robot::Update()
   power.Update();
 }
 
-void Robot::CalibrateLeg(RobotLeg &leg, Point calibratePoint)
-{
+void Robot::CalibrateLeg(RobotLeg &leg, Point calibratePoint){
   float alpha, beta, gamma;
   leg.CalculateAngle(calibratePoint, alpha, beta, gamma);
   leg.jointA.SetOffset(leg.jointA.jointAngleNow - alpha);
@@ -647,8 +646,7 @@ void Robot::CalibrateLeg(RobotLeg &leg, Point calibratePoint)
   leg.jointC.SetOffset(leg.jointC.jointAngleNow - gamma);
 }
 
-void Robot::UpdateAction()
-{
+void Robot::UpdateAction(){
   UpdateLegAction(leg1);
   UpdateLegAction(leg2);
   UpdateLegAction(leg3);
@@ -657,8 +655,7 @@ void Robot::UpdateAction()
   UpdateLegAction(leg6);
 }
 
-void Robot::UpdateLegAction(RobotLeg &leg)
-{
+void Robot::UpdateLegAction(RobotLeg &leg){
   float distance = Point::GetDistance(leg.pointNow, leg.pointGoal);
   float xDistance = leg.pointGoal.x - leg.pointNow.x;
   float yDistance = leg.pointGoal.y - leg.pointNow.y;
@@ -717,8 +714,7 @@ void RobotAction::SetSpeedMultiple(float multiple)
 
 void RobotAction::SetActionGroup(int group)
 {
-  switch (group)
-  {
+  switch (group){
   case 2:
     crawlSteps = 4;
     break;
@@ -730,8 +726,7 @@ void RobotAction::SetActionGroup(int group)
   }
 }
 
-void RobotAction::ActiveMode()
-{
+void RobotAction::ActiveMode(){
   ActionState();
   if (legsState != LegsState::CrawlState)
     InitialState();
@@ -767,36 +762,27 @@ void RobotAction::SwitchMode()
     ActiveMode();
 }
 
-void RobotAction::CrawlForward()
-{
+// Crawling actions 
+void RobotAction::CrawlForward(){
   Crawl(0, crawlLength, 0);
 }
-
-void RobotAction::CrawlBackward()
-{
+void RobotAction::CrawlBackward(){
   Crawl(0, -crawlLength, 0);
 }
-
-void RobotAction::CrawlLeft()
-{
+void RobotAction::CrawlLeft(){
   Crawl(crawlLength, 0, 0);
 }
-
-void RobotAction::CrawlRight()
-{
+void RobotAction::CrawlRight(){
   Crawl(-crawlLength, 0, 0);
 }
-
-void RobotAction::TurnLeft()
-{
+void RobotAction::TurnLeft(){
   Crawl(0, 0, -turnAngle);
 }
-
-void RobotAction::TurnRight()
-{
+void RobotAction::TurnRight(){
   Crawl(0, 0, turnAngle);
 }
 
+// Body specific commands
 void RobotAction::MoveBody(float x, float y, float z)
 {
   TwistBody(Point(x, y, z), Point(0, 0, 0));
@@ -860,8 +846,9 @@ void RobotAction::LegMoveToRelativelyDirectly(int leg, Point point)
   RobotLegsPoints points;
   robot.GetPointsNow(points);
 
+// ????
   switch (leg)
-  {
+  { // case responds to each leg
   case 1:
     points.leg1.x += point.x;
     points.leg1.y += point.y;
@@ -913,15 +900,15 @@ void RobotAction::ActionState()
   }
 }
 
-void RobotAction::Crawl(float x, float y, float angle)
-{
+void RobotAction::Crawl(float x, float y, float angle){
+  // Part of the code that controls the robot's forward crawling motion.
   ActionState();
   if (legsState != LegsState::CrawlState)
     InitialState();
   if (mode != Mode::Active)
     ActiveMode();
 
-  float length = sqrt(pow(x, 2) + pow(y, 2));
+  float length = sqrt(pow(x, 2) + pow(y, 2)); // find euclidean distance 
   if (length > crawlLength)
   {
     x = x * crawlLength / length;
@@ -954,8 +941,8 @@ void RobotAction::Crawl(float x, float y, float angle)
 
   legMoveIndex < crawlSteps ? legMoveIndex++ : legMoveIndex = 1;
 
-  switch (crawlSteps)
-  {
+  switch (crawlSteps){
+  // May control the phase of the robot's leg swings
   case 2:
     switch (legMoveIndex)
     {
@@ -1002,8 +989,7 @@ void RobotAction::Crawl(float x, float y, float angle)
     }
     break;
   case 4:
-    switch (legMoveIndex)
-    {
+    switch (legMoveIndex){
     case 1:
       points2.leg1 = points4.leg1;
       points3.leg1 = points5.leg1;
@@ -1069,8 +1055,7 @@ void RobotAction::Crawl(float x, float y, float angle)
     }
     break;
   case 6:
-    switch (legMoveIndex)
-    {
+    switch (legMoveIndex){
     case 1:
       points2.leg1 = points4.leg1;
       points3.leg1 = points5.leg1;
@@ -1158,9 +1143,38 @@ void RobotAction::Crawl(float x, float y, float angle)
     }
     break;
   }
-
   legsState = LegsState::CrawlState;
 }
+
+// ############################## Custom Code
+void RobotAction::RotateJoints(int leg, float theta1, float theta2, float theta3){
+  /*
+    Change the hip (θ1), knee (θ2), and ankle (θ2) angle of a selected robot leg.
+  */
+switch (leg){
+  case 1:
+    robot.leg1.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  case 2:
+    robot.leg2.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  case 3:
+    robot.leg3.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  case 4:
+    robot.leg4.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  case 5:
+    robot.leg5.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  case 6:
+    robot.leg6.ServosRotateTo(theta1, theta2, theta3);
+    break;
+  default:
+  break;
+  }
+}
+// #####################################################################################
 
 void RobotAction::ChangeBodyHeight(float height)
 {
@@ -1200,6 +1214,8 @@ bool RobotAction::CheckCrawlPoints(RobotLegsPoints points)
   robot.leg5.CalculateAngle(points.leg5, alpha5, beta, gamma);
   robot.leg6.CalculateAngle(points.leg6, alpha6, beta, gamma);
 
+
+// What am i looking at?
   if (alpha1 < 0) alpha1 += 360;
   if (alpha2 < 0) alpha2 += 360;
   if (alpha3 < 0) alpha3 += 360;

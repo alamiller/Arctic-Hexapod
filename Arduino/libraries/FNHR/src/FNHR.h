@@ -10,8 +10,8 @@
  * License    Creative Commons Attribution ShareAlike 3.0
  *            (http://creativecommons.org/licenses/by-sa/3.0/legalcode)
  * -----------------------------------------------------------------------------------------------*/
-
-#pragma once
+// File included once per compilation
+#pragma once 
 
 #include "FNHRRemote.h"
 
@@ -50,6 +50,8 @@ public:
   *           password  Wi-Fi password, at least 8 characters, case sensitive
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
+
+ // ########################################### Wifi ################################################
   void SetWiFi(String name, String password);
 
  /*
@@ -107,6 +109,7 @@ public:
   * Param     None
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
+  // ########################################### Crawl Commands #####################################
   void CrawlForward();
 
  /*
@@ -128,6 +131,7 @@ public:
   * Param     None
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
+
   void CrawlRight();
 
  /*
@@ -159,6 +163,15 @@ public:
   * Param     height    The height want to change
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
+ // ########################################### Custom ###############################################
+  /* 
+    Added Function to control the joint angles
+    directly
+    
+  */ 
+  void FNHR::RotateJoints(int leg, float theta1, float theta2, float theta3);
+   // #################################################################################################
+
   void ChangeBodyHeight(float height);
 
  /*
@@ -211,6 +224,7 @@ public:
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
   void SetActionGroup(int group);
+
 
 private:
   Communication communication;

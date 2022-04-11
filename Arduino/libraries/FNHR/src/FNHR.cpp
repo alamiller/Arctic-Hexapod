@@ -104,6 +104,19 @@ void FNHR::Crawl(float x, float y, float angle)
   if (!communication.commFunction)
     communication.robotAction.Crawl(x, y, angle);
 }
+ // ########################################### Custom ###############################################
+  /* 
+    Added Function to control the joint angles
+    directly
+    
+  */ 
+  void FNHR::RotateJoints(int leg, float theta1, float theta2, float theta3){
+    //if (!communication.commFunction){
+      communication.robotAction.RotateJoints(leg, theta1, theta2, theta3);
+   // }
+  };
+   // #################################################################################################
+
 
 void FNHR::ChangeBodyHeight(float height)
 {

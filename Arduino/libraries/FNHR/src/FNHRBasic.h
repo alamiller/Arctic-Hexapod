@@ -17,6 +17,16 @@
 #include <FlexiTimer2.h>
 
 class RobotShape
+ // Define the physical parameters of the robot.
+/*
+a -
+b - 
+c - Coxa height
+d - Coxa length
+e - Femur ?
+f - Tibia ?
+*/
+
 {
 public:
   float a;
@@ -108,8 +118,10 @@ public:
   volatile float x, y, z;
 };
 
-class RobotLegsPoints
-{
+
+
+class RobotLegsPoints{
+  // Location of of end effector points for the robot.
 public:
   RobotLegsPoints();
   RobotLegsPoints(Point leg1, Point leg2, Point leg3, Point leg4, Point leg5, Point leg6);
@@ -201,6 +213,7 @@ public:
   enum State { Install, Calibrate, Boot, Action };
   State state = State::Boot;
 
+  // Robot set up states
   void InstallState();
   void CalibrateState();
   void CalibrateServos();
@@ -289,6 +302,10 @@ public:
 
   void Crawl(float x, float y, float angle);
 
+  // ###########
+    void RotateJoints(int leg, float theta1, float theta2, float theta3);
+  // #####
+
   void ChangeBodyHeight(float height);
 
   void MoveBody(float x, float y, float z);
@@ -328,7 +345,7 @@ private:
   const float minAlphaInterval = 0;
 
   int crawlSteps = 2;
-  int legMoveIndex = 1;
+  int legMoveIndex = 1; // ??
 
   bool CheckCrawlPoints(RobotLegsPoints points);
 
